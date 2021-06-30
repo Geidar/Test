@@ -1,0 +1,65 @@
+ boolean procesando = false; 
+
+private void btnSubirSeriesActionPerformed(java.awt.event.ActionEvent evt) {                                               
+        // TODO add your handling code here:      
+        procesando = true;
+
+        if (!"".equals(txtRutaArchivo.getText())) {
+            objDatos.setPathFile(txtRutaArchivo.getText());
+            try {
+                //jPBarStatus.setIndeterminate(true);
+
+                //jTxtLog.setText("Procesando...\n");
+                SwingWorker worker = new SwingWorker<Boolean, Void>() {
+
+                    @Override
+                    protected Boolean doInBackground() throws Exception {
+                        //System.out.println("fjksfjkask");
+                        //jPBarStatus.setVisible(true);
+
+                        Thread thread = new Thread(new Runnable() {
+                            //int i = 0;
+
+                            public void run() {
+                                while (procesando) {
+                                    //jTxtLog.append("" + i);
+                                    //i++;
+                                    jTxtLog.setText(procesar.log);
+                                    jTxtLog.setCaretPosition(jTxtLog.getDocument().getLength());
+                                    try {
+                                        Thread.sleep(1);
+                                    } catch (InterruptedException ex) {
+                                        Logger.getLogger(VistaSalidasEInventario.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                }
+                            }
+                        });
+                        thread.start();
+
+                        procesar.subirSeries(objDatos);
+                        return true;
+                    }
+
+                    @Override
+                    protected void done() {
+                        procesando = false;
+                        //jPBarStatus.setIndeterminate(false);
+                        //jPBarStatus.setValue(100);
+                        //jPBarStatus.update(jPBarStatus.getGraphics());
+                        jTxtLog.setText("Series cargadas correctamente!\n\n" + procesar.logResults);
+                        JOptionPane.showMessageDialog(null, "La tarea finalizo correctamente", "Aceptar", JOptionPane.INFORMATION_MESSAGE);
+                        //JOptionPane.showMessageDialog(this, "Series " + objDatos.getNombreHoja() + " cargadas en temporal", "Aceptar", JOptionPane.INFORMATION_MESSAGE);
+                        jPBarStatus.setVisible(false);
+                    }
+                };
+                worker.execute();
+
+            } catch (Exception ex) {
+                //ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error al cargar salidas, verificar archivo\nCausa: " + ex.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecciona un archivo", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+
+    }                  
